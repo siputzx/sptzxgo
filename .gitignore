@@ -1,0 +1,8 @@
+.env
+session.db
+session.db-shm
+session.db-wal
+*.db
+*.db-shm
+*.db-wal
+/sptzx
