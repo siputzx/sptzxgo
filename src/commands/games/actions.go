@@ -30,7 +30,7 @@ func init() {
 		Handler: func(ptz *core.Ptz) error {
 			quotedID := getQuotedID(ptz)
 			if quotedID == "" {
-				return ptz.ReplyText("💡 Untuk minta clue, *reply pesan soal* lalu ketik !clue")
+				return ptz.ReplyText(fmt.Sprintf("Untuk minta clue, reply pesan soal lalu ketik *%sclue*.", ptz.Bot.GetPrefix()))
 			}
 
 			sess, ok := MatchByQuestionID(quotedID)
@@ -49,7 +49,7 @@ func init() {
 			}
 
 			if sess.ClueCount >= 3 {
-				return ptz.ReplyText("🚫 Clue sudah habis! Maksimal 3 clue per soal.\nKetik *!nyerah* (reply soal) untuk menyerah.")
+				return ptz.ReplyText(fmt.Sprintf("*Clue sudah habis.*\n\n- Maksimal 3 clue per soal\n- Jika ingin berhenti, reply pesan soal lalu ketik *%snyerah*", ptz.Bot.GetPrefix()))
 			}
 
 			sess.ClueCount++
@@ -68,7 +68,7 @@ func init() {
 		Handler: func(ptz *core.Ptz) error {
 			quotedID := getQuotedID(ptz)
 			if quotedID == "" {
-				return ptz.ReplyText("🏳️ Untuk menyerah, *reply pesan soal* lalu ketik !nyerah")
+				return ptz.ReplyText(fmt.Sprintf("Untuk menyerah, reply pesan soal lalu ketik *%snyerah*.", ptz.Bot.GetPrefix()))
 			}
 
 			sess, ok := MatchByQuestionID(quotedID)
@@ -94,7 +94,7 @@ func init() {
 			DeleteSession(sess)
 
 			return ptz.ReplyText(fmt.Sprintf(
-				"🏳️ *Nyerah!*\n\nGame: %s\nJawaban: *%s*\n\n_Semangat untuk soal berikutnya!_",
+				"*Game dihentikan*\n\n- Jenis game: *%s*\n- Jawaban yang benar: *%s*\n- Reward: *+0 balance* karena kamu menyerah\n\nKalau mau main lagi, pilih game lain dari daftar game.",
 				name, sess.Answer,
 			))
 		},
@@ -130,8 +130,8 @@ func init() {
 			}
 
 			return ptz.ReplyText(fmt.Sprintf(
-				"🎮 *Soal Aktif*\n\nGame: %s\nSisa waktu: %s%s%s\n\n_Reply pesan soal untuk menjawab, minta clue, atau menyerah_",
-				name, remaining, clueInfo, starterInfo,
+				"*Soal aktif saat ini*\n\n- Game: *%s*\n- Sisa waktu: *%s*%s%s\n\n*Cara main:*\n- Reply pesan soal untuk menjawab\n- Reply lalu ketik *%sclue* untuk petunjuk\n- Reply lalu ketik *%snyerah* untuk menyerah\n- %s",
+				name, remaining, clueInfo, starterInfo, ptz.Bot.GetPrefix(), ptz.Bot.GetPrefix(), RewardGuide(),
 			))
 		},
 	})
@@ -145,15 +145,15 @@ func init() {
 		Handler: func(ptz *core.Ptz) error {
 			p := ptz.Bot.GetPrefix()
 			var sb strings.Builder
-			sb.WriteString("🎮 *Daftar Game*\n\n")
+			sb.WriteString("*Daftar game*\n\n")
 			for _, gt := range allGameTypes {
 				name := gameTypeNames[gt]
 				sb.WriteString(fmt.Sprintf("• *%s%s* — %s\n", p, gt, name))
 			}
-			sb.WriteString(fmt.Sprintf("\n📌 *Command Pendukung*\n"))
-			sb.WriteString(fmt.Sprintf("• *%sclue* — minta petunjuk, maks 3x (reply soal)\n", p))
-			sb.WriteString(fmt.Sprintf("• *%snyerah* — lihat jawaban & akhiri (reply soal)\n", p))
-			sb.WriteString(fmt.Sprintf("• *%ssoalku* — cek soal aktif\n", p))
+			sb.WriteString("\n*Command pendukung*\n")
+			sb.WriteString(fmt.Sprintf("• *%sclue* — minta petunjuk, maksimal 3 kali, harus reply soal\n", p))
+			sb.WriteString(fmt.Sprintf("• *%snyerah* — menyerah dan lihat jawaban, harus reply soal\n", p))
+			sb.WriteString(fmt.Sprintf("• *%ssoalku* — lihat kembali status soal aktif\n", p))
 			return ptz.ReplyText(sb.String())
 		},
 	})

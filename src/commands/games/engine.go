@@ -39,8 +39,8 @@ func playGame(ptz *core.Ptz, def GameDef) error {
 			name := gameTypeNames[sess.GameType]
 			remaining := getRemainingTimeFromSess(sess)
 			return ptz.ReplyText(fmt.Sprintf(
-				"⏳ Grup ini sudah ada game *%s* yang sedang berjalan!\nSisa waktu: %s\n\n_Jawab dulu atau tunggu habis._",
-				name, remaining,
+				"*Masih ada game yang sedang berjalan*\n\n- Game: *%s*\n- Sisa waktu: *%s*\n\n*Cara lanjut:*\n- reply pesan soal untuk menjawab\n- reply pesan soal lalu ketik *%sclue* jika buntu\n- reply pesan soal lalu ketik *%snyerah* jika ingin berhenti",
+				name, remaining, ptz.Bot.GetPrefix(), ptz.Bot.GetPrefix(),
 			))
 		}
 	} else {
@@ -48,8 +48,8 @@ func playGame(ptz *core.Ptz, def GameDef) error {
 			name := gameTypeNames[sess.GameType]
 			remaining := getRemainingTimeFromSess(sess)
 			return ptz.ReplyText(fmt.Sprintf(
-				"⏳ Kamu masih punya soal *%s* aktif!\nSisa waktu: %s\n\n_Jawab dulu atau tunggu habis._",
-				name, remaining,
+				"*Kamu masih punya soal aktif*\n\n- Game: *%s*\n- Sisa waktu: *%s*\n\n*Cara lanjut:*\n- reply pesan soal untuk menjawab\n- reply pesan soal lalu ketik *%sclue* jika buntu\n- reply pesan soal lalu ketik *%snyerah* jika ingin berhenti",
+				name, remaining, ptz.Bot.GetPrefix(), ptz.Bot.GetPrefix(),
 			))
 		}
 	}
@@ -57,7 +57,11 @@ func playGame(ptz *core.Ptz, def GameDef) error {
 	ptz.React("⏳")
 	defer ptz.Unreact()
 
-	client := api.NewClient(ptz.Bot.Config.SiputzX.BaseURL)
+	client := ptz.Bot.API
+	if client == nil {
+		client = api.NewClient(ptz.Bot.Config.SiputzX.BaseURL)
+		client.SetLogger(ptz.Bot.Log)
+	}
 	raw, err := client.Get(context.Background(), def.Endpoint, nil)
 	if err != nil {
 		return ptz.ReplyText("❌ Gagal mengambil soal: " + err.Error())
@@ -69,7 +73,7 @@ func playGame(ptz *core.Ptz, def GameDef) error {
 	}
 
 	teks := def.Format(soal)
-	footer := fmt.Sprintf("\n\n_⏱ Waktu: %d menit | Reply pesan ini dengan jawabanmu_", int(sessionTTL.Minutes()))
+	footer := fmt.Sprintf("\n\n*Aturan main*\n- Waktu: *%d menit*\n- Balas pesan ini dengan jawabanmu\n- Butuh petunjuk: reply lalu ketik *%sclue*\n- Mau menyerah: reply lalu ketik *%snyerah*\n- %s", int(sessionTTL.Minutes()), ptz.Bot.GetPrefix(), ptz.Bot.GetPrefix(), RewardGuide())
 
 	var questionID string
 

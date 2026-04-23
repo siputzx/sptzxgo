@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"sptzx/src/core"
 	"sptzx/src/utils"
@@ -32,6 +33,7 @@ func init() {
 		Description: "Lihat daftar kategori atau command",
 		Usage:       "menu | menu all | menu <kategori>",
 		Category:    "general",
+		Limit:       core.PerUserLimit(30, time.Minute),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return sendGreetMenu(ptz)
@@ -50,8 +52,8 @@ func sendGreetMenu(ptz *core.Ptz) error {
 	name := ptz.GetSenderName()
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s, %s!\n\n", greeting, name))
-	sb.WriteString("Berikut adalah daftar kategori command:\n")
+	sb.WriteString(fmt.Sprintf("*%s, %s*\n\n", greeting, name))
+	sb.WriteString("*Kategori command yang tersedia:*\n")
 
 	cats := make(map[string]bool)
 	for _, cmd := range core.GlobalRegistry().All() {
@@ -69,16 +71,18 @@ func sendGreetMenu(ptz *core.Ptz) error {
 		if emoji == "" {
 			emoji = "📌 " + strings.Title(cat)
 		}
-		sb.WriteString(fmt.Sprintf("> %s\n", emoji))
+		sb.WriteString(fmt.Sprintf("- %s\n", emoji))
 	}
 
-	sb.WriteString("\nKetik `.menu <kategori>` untuk melihat isi.\nAtau `.menu all` untuk semua.")
+	sb.WriteString("\n*Cara pakai:*\n")
+	sb.WriteString("- ketik `.menu <kategori>` untuk melihat isi kategori\n")
+	sb.WriteString("- ketik `.menu all` untuk melihat semua command")
 	return ptz.ReplyText(sb.String())
 }
 
 func sendFullMenu(ptz *core.Ptz) error {
 	var sb strings.Builder
-	sb.WriteString("📋 *Daftar Semua Command*\n\n")
+	sb.WriteString("*Daftar semua command*\n\n")
 
 	byCat := core.GlobalRegistry().ByCategory()
 	categories := make([]string, 0, len(byCat))
@@ -93,7 +97,7 @@ func sendFullMenu(ptz *core.Ptz) error {
 		if emoji == "" {
 			emoji = "📌 " + strings.Title(cat)
 		}
-		sb.WriteString(fmt.Sprintf("> *%s*\n", emoji))
+		sb.WriteString(fmt.Sprintf("*%s*\n", emoji))
 		for _, cmd := range cmds {
 			sb.WriteString(fmt.Sprintf("- %s\n", cmd.Name))
 		}
@@ -116,7 +120,7 @@ func sendCategoryMenu(ptz *core.Ptz, category string) error {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("> *%s*\n\n", emoji))
+	sb.WriteString(fmt.Sprintf("*%s*\n\n", emoji))
 	for _, cmd := range cmds {
 		sb.WriteString(fmt.Sprintf("- %s\n", cmd.Name))
 	}

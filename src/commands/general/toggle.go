@@ -39,6 +39,15 @@ func init() {
 			ptz.Bot.Settings.SetGroupSettings(ptz.Chat, s)
 			return replyToggle(ptz, "Goodbye message", enable)
 
+		case "antidelete":
+			if err := checkAdmin(ptz); err != nil {
+				return ptz.ReplyText(err.Error())
+			}
+			s := ptz.Bot.Settings.GetGroupSettings(ptz.Chat)
+			s.AntiDeleteEnabled = enable
+			ptz.Bot.Settings.SetGroupSettings(ptz.Chat, s)
+			return replyToggle(ptz, "Anti Delete", enable)
+
 		case "announce":
 			if err := checkBotAdmin(ptz); err != nil {
 				return ptz.ReplyText(err.Error())
@@ -153,6 +162,9 @@ func checkAdmin(ptz *core.Ptz) error {
 	if !ptz.IsGroup {
 		return fmt.Errorf("🚫 Perintah ini hanya bisa digunakan di grup.")
 	}
+	if err := ptz.LoadGroupInfo(); err != nil {
+		return fmt.Errorf("🚫 Gagal memuat data grup. Coba lagi sebentar.")
+	}
 	if !ptz.IsAdmin() && !ptz.IsOwner() {
 		return fmt.Errorf("🚫 Kamu bukan admin grup ini.")
 	}
@@ -182,6 +194,7 @@ func sendToggleMenu(ptz *core.Ptz) error {
 	msg += "*Kategori Group (Butuh Admin):*\n"
 	msg += "• welcome (Sambut member baru)\n"
 	msg += "• goodbye (Pesan member keluar)\n"
+	msg += "• antidelete (Tampilkan pesan yang dihapus)\n"
 	msg += "• announce (Hanya admin yg bisa chat)\n"
 	msg += "• locked (Hanya admin yg bisa edit grup)\n"
 	msg += "• approval (Persetujuan saat join)\n"

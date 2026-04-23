@@ -2,7 +2,6 @@ package games
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
 	"unicode"
 )
@@ -29,18 +28,19 @@ func buildClue(answer string, clueCount int) string {
 	n := len(runes)
 
 	revealed := make([]bool, n)
+	alphaIdx := make([]int, 0, n)
 
 	for i, r := range runes {
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
 			revealed[i] = true
+		} else {
+			alphaIdx = append(alphaIdx, i)
 		}
 	}
 
-	totalLetters := 0
-	for _, r := range revealed {
-		if !r {
-			totalLetters++
-		}
+	totalLetters := len(alphaIdx)
+	if totalLetters == 0 {
+		return answer
 	}
 
 	revealCount := 0
@@ -53,18 +53,8 @@ func buildClue(answer string, clueCount int) string {
 		revealCount = max(1, (totalLetters*3)/4)
 	}
 
-	hiddenIdx := make([]int, 0, totalLetters)
-	for i, r := range revealed {
-		if !r {
-			hiddenIdx = append(hiddenIdx, i)
-		}
-	}
-
-	rand.Shuffle(len(hiddenIdx), func(i, j int) {
-		hiddenIdx[i], hiddenIdx[j] = hiddenIdx[j], hiddenIdx[i]
-	})
-	for i := 0; i < revealCount && i < len(hiddenIdx); i++ {
-		revealed[hiddenIdx[i]] = true
+	for _, idx := range revealPlan(alphaIdx, revealCount) {
+		revealed[idx] = true
 	}
 
 	var sb strings.Builder
@@ -86,6 +76,37 @@ func buildClue(answer string, clueCount int) string {
 	return sb.String()
 }
 
+func revealPlan(alphaIdx []int, revealCount int) []int {
+	if revealCount >= len(alphaIdx) {
+		return alphaIdx
+	}
+
+	plan := make([]int, 0, len(alphaIdx))
+	used := make(map[int]struct{}, len(alphaIdx))
+
+	left, right := 0, len(alphaIdx)-1
+	for left <= right {
+		mid := (left + right) / 2
+		for _, pos := range []int{mid, left, right} {
+			if pos < 0 || pos >= len(alphaIdx) {
+				continue
+			}
+			if _, ok := used[pos]; ok {
+				continue
+			}
+			used[pos] = struct{}{}
+			plan = append(plan, alphaIdx[pos])
+		}
+		left++
+		right--
+	}
+
+	if len(plan) > revealCount {
+		return plan[:revealCount]
+	}
+	return plan
+}
+
 func clueLabel(clueCount int) string {
 	switch clueCount {
 	case 1:
@@ -105,10 +126,11 @@ func formatClueMessage(sess *Session) string {
 	clue := buildClue(sess.Answer, sess.ClueCount)
 	remaining := getRemainingTime(sess.ChatJID, sess.StarterJID, sess.GameType)
 	return fmt.Sprintf(
-		"%s\n\n`%s`\n\n_Sisa waktu: %s_",
+		"%s\n\n`%s`\n\nSisa waktu: %s\nReward jika benar sekarang: +%d balance",
 		clueLabel(sess.ClueCount),
 		clue,
 		remaining,
+		RewardForClueCount(sess.ClueCount),
 	)
 }
 
