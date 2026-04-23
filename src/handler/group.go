@@ -11,15 +11,15 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 )
 
-type GroupEventHandler struct {
+type GroupHandler struct {
 	bot *core.Bot
 }
 
-func NewGroupEventHandler(bot *core.Bot) *GroupEventHandler {
-	return &GroupEventHandler{bot: bot}
+func NewGroupHandler(bot *core.Bot) *GroupHandler {
+	return &GroupHandler{bot: bot}
 }
 
-func (h *GroupEventHandler) OnGroupInfo(evt *events.GroupInfo) {
+func (h *GroupHandler) OnGroupInfo(evt *events.GroupInfo) {
 	if len(evt.Join) > 0 {
 		h.sendGroupMessage(evt.JID, evt.Join, true)
 	}
@@ -28,15 +28,15 @@ func (h *GroupEventHandler) OnGroupInfo(evt *events.GroupInfo) {
 	}
 }
 
-func (h *GroupEventHandler) OnPicture(evt *events.Picture) {
+func (h *GroupHandler) OnPicture(evt *events.Picture) {
 	h.bot.Log.Debugf("Picture changed for %s by %s", evt.JID, evt.Author)
 }
 
-func (h *GroupEventHandler) OnJoinedGroup(evt *events.JoinedGroup) {
+func (h *GroupHandler) OnJoinedGroup(evt *events.JoinedGroup) {
 	h.bot.Log.Infof("Joined group: %s", evt.JID)
 }
 
-func (h *GroupEventHandler) resolvePhoneJID(jid types.JID) types.JID {
+func (h *GroupHandler) resolvePhoneJID(jid types.JID) types.JID {
 	if jid.Server == types.HiddenUserServer {
 		pn, err := h.bot.Client.Store.LIDs.GetPNForLID(context.Background(), jid)
 		if err == nil && !pn.IsEmpty() {
@@ -47,7 +47,7 @@ func (h *GroupEventHandler) resolvePhoneJID(jid types.JID) types.JID {
 	return types.NewJID(jid.User, types.DefaultUserServer)
 }
 
-func (h *GroupEventHandler) sendGroupMessage(groupJID types.JID, participants []types.JID, isJoin bool) {
+func (h *GroupHandler) sendGroupMessage(groupJID types.JID, participants []types.JID, isJoin bool) {
 	settings := h.bot.Settings.GetGroupSettings(groupJID)
 
 	if isJoin && !settings.WelcomeEnabled {

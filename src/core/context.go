@@ -29,7 +29,51 @@ type Ptz struct {
 }
 
 func NewPtz(bot *Bot, evt *events.Message) *Ptz {
-	body := extractBody(evt.Message)
+	body := ExtractBody(evt.Message)
+	parts, cmd, rawArgs, args := parseCommandParts(bot, body)
+
+	_ = parts
+
+	return &Ptz{
+		Bot:       bot,
+		Event:     evt,
+		Message:   evt.Message,
+		Info:      evt.Info,
+		Args:      args,
+		RawArgs:   rawArgs,
+		Command:   cmd,
+		IsGroup:   evt.Info.IsGroup,
+		IsFromMe:  evt.Info.IsFromMe,
+		Sender:    evt.Info.Sender,
+		SenderAlt: evt.Info.SenderAlt,
+		Chat:      evt.Info.Chat,
+	}
+}
+
+func NewPtzFromNormalizedMessage(bot *Bot, msg *NormalizedMessage) *Ptz {
+	if msg == nil {
+		return nil
+	}
+
+	_, cmd, rawArgs, args := parseCommandParts(bot, msg.Body)
+
+	return &Ptz{
+		Bot:       bot,
+		Event:     msg.Event,
+		Message:   msg.Message,
+		Info:      msg.Info,
+		Args:      args,
+		RawArgs:   rawArgs,
+		Command:   cmd,
+		IsGroup:   msg.IsGroup,
+		IsFromMe:  msg.IsFromMe,
+		Sender:    msg.Sender,
+		SenderAlt: msg.SenderAlt,
+		Chat:      msg.Chat,
+	}
+}
+
+func parseCommandParts(bot *Bot, body string) ([]string, string, string, []string) {
 	parts := strings.Fields(body)
 
 	var cmd, rawArgs string
@@ -48,23 +92,10 @@ func NewPtz(bot *Bot, evt *events.Message) *Ptz {
 		}
 	}
 
-	return &Ptz{
-		Bot:       bot,
-		Event:     evt,
-		Message:   evt.Message,
-		Info:      evt.Info,
-		Args:      args,
-		RawArgs:   rawArgs,
-		Command:   cmd,
-		IsGroup:   evt.Info.IsGroup,
-		IsFromMe:  evt.Info.IsFromMe,
-		Sender:    evt.Info.Sender,
-		SenderAlt: evt.Info.SenderAlt,
-		Chat:      evt.Info.Chat,
-	}
+	return parts, cmd, rawArgs, args
 }
 
-func extractBody(msg *waE2E.Message) string {
+func ExtractBody(msg *waE2E.Message) string {
 	if msg == nil {
 		return ""
 	}
@@ -79,6 +110,12 @@ func extractBody(msg *waE2E.Message) string {
 		return *msg.VideoMessage.Caption
 	case msg.DocumentMessage != nil && msg.DocumentMessage.Caption != nil:
 		return *msg.DocumentMessage.Caption
+	case msg.ButtonsResponseMessage != nil:
+		return msg.GetButtonsResponseMessage().GetSelectedDisplayText()
+	case msg.TemplateButtonReplyMessage != nil:
+		return msg.GetTemplateButtonReplyMessage().GetSelectedDisplayText()
+	case msg.ListResponseMessage != nil:
+		return msg.GetListResponseMessage().GetTitle()
 	}
 	return ""
 }
@@ -239,7 +276,7 @@ func (ptz *Ptz) GetReplyText() string {
 		return ""
 	}
 
-	return extractBody(ext.ContextInfo.QuotedMessage)
+	return ExtractBody(ext.ContextInfo.QuotedMessage)
 }
 
 func (ptz *Ptz) GetPhoneJID() types.JID {
