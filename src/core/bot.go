@@ -12,15 +12,19 @@ import (
 )
 
 type Bot struct {
-	Client    *whatsmeow.Client
-	Config    *config.Config
-	Antispam  *middleware.Antispam
-	Settings  *SettingsStore
-	BotConfig *BotSettings
-	Registry  *Registry
-	Container *sqlstore.Container
-	Log       waLog.Logger
-	API       *api.Client
+	Client         *whatsmeow.Client
+	Config         *config.Config
+	Antispam       *middleware.Antispam
+	CommandLimiter *middleware.CommandLimiter
+	Settings       *SettingsStore
+	Users          *UserStore
+	Messages       *MessageStore
+	Polls          *PollStore
+	BotConfig      *BotSettings
+	Registry       *Registry
+	Container      *sqlstore.Container
+	Log            waLog.Logger
+	API            *api.Client
 }
 
 func NewBot(cfg *config.Config, container *sqlstore.Container, client *whatsmeow.Client, log waLog.Logger, db *sql.DB) *Bot {
@@ -28,14 +32,18 @@ func NewBot(cfg *config.Config, container *sqlstore.Container, client *whatsmeow
 	apiClient.SetLogger(log)
 
 	return &Bot{
-		Client:    client,
-		Config:    cfg,
-		Antispam:  middleware.NewAntispam(cfg.Antispam.MaxMsgPerSecond, cfg.Antispam.MaxMsgPerMinute, cfg.Antispam.BanDurationSecs),
-		Settings:  NewSettingsStore(db, log),
-		BotConfig: NewBotSettings(),
-		Container: container,
-		Log:       log,
-		API:       apiClient,
+		Client:         client,
+		Config:         cfg,
+		Antispam:       middleware.NewAntispam(cfg.Antispam.MaxMsgPerSecond, cfg.Antispam.MaxMsgPerMinute, cfg.Antispam.BanDurationSecs),
+		CommandLimiter: middleware.NewCommandLimiter(),
+		Settings:       NewSettingsStore(db, log),
+		Users:          NewUserStore(db, log),
+		Messages:       NewMessageStore(),
+		Polls:          NewPollStore(),
+		BotConfig:      NewBotSettings(),
+		Container:      container,
+		Log:            log,
+		API:            apiClient,
 	}
 }
 

@@ -1,10 +1,78 @@
 package core
 
 import (
+	"fmt"
 	"sort"
+	"time"
 )
 
 type HandlerFunc func(ctx *Ptz) error
+
+type CommandQuota struct {
+	Enabled bool
+	Cost    int
+}
+
+func PerUserQuota(cost int) *CommandQuota {
+	return &CommandQuota{Enabled: true, Cost: cost}
+}
+
+func EnsureQuotaAvailable(ptz *Ptz, amount int) error {
+	if amount <= 0 || ptz == nil || ptz.Bot == nil || ptz.Bot.Users == nil {
+		return nil
+	}
+	if ptz.IsOwner() {
+		return nil
+	}
+
+	userID := ptz.GetPhoneJID().User
+	if ptz.Bot.Users.IsPremium(userID) {
+		return nil
+	}
+
+	profile := ptz.Bot.Users.GetUserProfile(userID)
+	if profile.LimitBalance < amount {
+		return ptz.ReplyText("Limit kamu habis gunakan command buylimit atau hubungi owner")
+	}
+	return nil
+}
+
+func ConsumeQuota(ptz *Ptz, amount int) error {
+	if amount <= 0 || ptz == nil || ptz.Bot == nil || ptz.Bot.Users == nil {
+		return nil
+	}
+	if ptz.IsOwner() {
+		return nil
+	}
+
+	userID := ptz.GetPhoneJID().User
+	if ptz.Bot.Users.IsPremium(userID) {
+		return nil
+	}
+
+	ok, err := ptz.Bot.Users.ConsumeLimit(userID, amount)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ptz.ReplyText("Limit kamu habis gunakan command buylimit atau hubungi owner")
+	}
+	return nil
+}
+
+type CommandLimit struct {
+	Enabled bool
+	Max     int
+	Window  time.Duration
+}
+
+func PerUserLimit(max int, window time.Duration) *CommandLimit {
+	return &CommandLimit{
+		Enabled: true,
+		Max:     max,
+		Window:  window,
+	}
+}
 
 type Command struct {
 	Name        string
@@ -16,6 +84,8 @@ type Command struct {
 	GroupOnly   bool
 	AdminOnly   bool
 	BotAdmin    bool
+	Quota       *CommandQuota
+	Limit       *CommandLimit
 	Handler     HandlerFunc
 }
 
@@ -109,5 +179,40 @@ func (c *Command) Execute(ptz *Ptz) error {
 		return nil
 	}
 
+	if c.Quota != nil && c.Quota.Enabled && c.Quota.Cost > 0 && ptz.Bot != nil && ptz.Bot.Users != nil && !ptz.IsOwner() {
+		if err := ConsumeQuota(ptz, c.Quota.Cost); err != nil {
+			ptz.Bot.Log.Errorf("consume limit failed on %s: %v", c.Name, err)
+			return nil
+		}
+	}
+
+	if c.Limit != nil && c.Limit.Enabled && ptz.Bot != nil && ptz.Bot.CommandLimiter != nil {
+		allowed, retryAfter := ptz.Bot.CommandLimiter.Allow(c.Name, ptz.Sender.User, c.Limit.Max, c.Limit.Window)
+		if !allowed {
+			ptz.ReplyText(fmt.Sprintf("Limit command %s habis coba lagi dalam %s", c.Name, formatRetryAfter(retryAfter)))
+			return nil
+		}
+	}
+
+	if ptz.Bot != nil && ptz.Bot.Users != nil {
+		userID := ptz.GetPhoneJID().User
+		if _, _, err := ptz.Bot.Users.TrackInteraction(userID); err != nil {
+			ptz.Bot.Log.Errorf("track interaction failed for %s: %v", userID, err)
+		}
+	}
+
 	return c.Handler(ptz)
+}
+
+func formatRetryAfter(d time.Duration) string {
+	if d <= 0 {
+		return "beberapa detik"
+	}
+
+	mins := int(d.Minutes())
+	secs := int(d.Seconds()) % 60
+	if mins > 0 {
+		return fmt.Sprintf("%d menit %d detik", mins, secs)
+	}
+	return fmt.Sprintf("%d detik", secs)
 }
