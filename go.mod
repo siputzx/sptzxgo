@@ -29,6 +29,7 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/nyaruka/phonenumbers v1.7.1 // indirect
 	github.com/petermattis/goid v0.0.0-20260226131333-17d1149c6ac6 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect

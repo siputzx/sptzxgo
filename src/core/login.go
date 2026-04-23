@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/mdp/qrterminal/v3"
@@ -74,12 +75,20 @@ func LoginPairCode(client *whatsmeow.Client, phone string, log waLog.Logger) err
 	fmt.Println("Masukkan kode di atas, tunggu hingga terhubung...")
 
 	done := make(chan struct{})
+	var once sync.Once
 	id := client.AddEventHandler(func(evt interface{}) {
 		if _, ok := evt.(*events.PairSuccess); ok {
-			close(done)
+			once.Do(func() {
+				close(done)
+			})
 		}
 	})
 	defer client.RemoveEventHandler(id)
-	<-done
-	return nil
+
+	select {
+	case <-done:
+		return nil
+	case <-time.After(3 * time.Minute):
+		return fmt.Errorf("pairing timeout: tidak ada PairSuccess dalam 3 menit")
+	}
 }

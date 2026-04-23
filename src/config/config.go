@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -71,6 +72,10 @@ func Load() *Config {
 	if loginMethod == "" {
 		loginMethod = "qr"
 	}
+	loginMethod = strings.ToLower(strings.TrimSpace(loginMethod))
+	if loginMethod == "pair" {
+		loginMethod = "paircode"
+	}
 
 	timezone := os.Getenv("TIMEZONE")
 	if timezone == "" {
@@ -100,6 +105,10 @@ func Load() *Config {
 	}
 	geminiCookie := os.Getenv("GEMINI_COOKIE")
 
+	maxMsgPerSecond := parseEnvInt("ANTISPAM_MAX_PER_SECOND", 3)
+	maxMsgPerMinute := parseEnvInt("ANTISPAM_MAX_PER_MINUTE", 20)
+	banDurationSecs := parseEnvInt("ANTISPAM_BAN_DURATION_SECS", 30)
+
 	return &Config{
 		Owners:          filtered,
 		Prefixes:        cleanPrefixes,
@@ -111,9 +120,9 @@ func Load() *Config {
 		StickerPackName: stickerPackName,
 		StickerAuthor:   stickerAuthor,
 		Antispam: AntispamConfig{
-			MaxMsgPerSecond: 3,
-			MaxMsgPerMinute: 20,
-			BanDurationSecs: 30,
+			MaxMsgPerSecond: maxMsgPerSecond,
+			MaxMsgPerMinute: maxMsgPerMinute,
+			BanDurationSecs: banDurationSecs,
 		},
 		SiputzX: SiputzXConfig{
 			Enabled:      siputzxEnabled == "true",
@@ -123,6 +132,20 @@ func Load() *Config {
 	}
 }
 
+func parseEnvInt(key string, fallback int) int {
+	v := strings.TrimSpace(os.Getenv(key))
+	if v == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.Atoi(v)
+	if err != nil || parsed <= 0 {
+		return fallback
+	}
+
+	return parsed
+}
+
 func (c *Config) Validate() error {
 	if len(c.Owners) == 0 {
 		return fmt.Errorf("BOT_OWNERS tidak boleh kosong di .env")
@@ -130,8 +153,11 @@ func (c *Config) Validate() error {
 	if c.SessionDB == "" {
 		return fmt.Errorf("SESSION_DB tidak diset di .env")
 	}
-	if c.LoginMethod == "paircode" && c.PairingPhone == "" {
-		return fmt.Errorf("PAIRING_PHONE wajib diisi jika LOGIN_METHOD=paircode")
+	if c.LoginMethod != "qr" && c.LoginMethod != "paircode" {
+		return fmt.Errorf("LOGIN_METHOD harus qr atau paircode")
+	}
+	if c.Antispam.MaxMsgPerSecond <= 0 || c.Antispam.MaxMsgPerMinute <= 0 || c.Antispam.BanDurationSecs <= 0 {
+		return fmt.Errorf("konfigurasi antispam harus lebih dari 0")
 	}
 	return nil
 }

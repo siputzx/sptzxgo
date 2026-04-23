@@ -122,20 +122,33 @@ func main() {
 	evtHandler := handler.NewEventHandler(bot, registry)
 	client.AddEventHandler(evtHandler.Handle)
 
-	switch cfg.LoginMethod {
-	case "pair", "paircode":
-		if cfg.PairingPhone == "" {
-			fmt.Fprintln(os.Stderr, "PAIRING_PHONE wajib diisi di .env")
+	if deviceStore.ID != nil {
+		log.Infof("Session ditemukan. Auto connect tanpa login ulang.")
+		if err := client.Connect(); err != nil {
+			fmt.Fprintln(os.Stderr, "Connect error:", err)
 			os.Exit(1)
 		}
-		if err := core.LoginPairCode(client, cfg.PairingPhone, log); err != nil {
-			fmt.Fprintln(os.Stderr, "Login error:", err)
+	} else {
+		if err := core.ResolveLoginConfigInteractive(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "CLI login setup error:", err)
 			os.Exit(1)
 		}
-	default:
-		if err := core.LoginQR(client, log); err != nil {
-			fmt.Fprintln(os.Stderr, "Login error:", err)
-			os.Exit(1)
+
+		switch cfg.LoginMethod {
+		case "pair", "paircode":
+			if cfg.PairingPhone == "" {
+				fmt.Fprintln(os.Stderr, "PAIRING_PHONE wajib diisi untuk pairing")
+				os.Exit(1)
+			}
+			if err := core.LoginPairCode(client, cfg.PairingPhone, log); err != nil {
+				fmt.Fprintln(os.Stderr, "Login error:", err)
+				os.Exit(1)
+			}
+		default:
+			if err := core.LoginQR(client, log); err != nil {
+				fmt.Fprintln(os.Stderr, "Login error:", err)
+				os.Exit(1)
+			}
 		}
 	}
 
