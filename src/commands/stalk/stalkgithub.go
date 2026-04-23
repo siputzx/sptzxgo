@@ -17,6 +17,7 @@ func init() {
 		Description: "Stalk profil GitHub",
 		Usage:       "stalkgithub <username>",
 		Category:    "stalk",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("*stalkgithub* — Stalk profil GitHub\n\nUsage: .stalkgithub <username>")

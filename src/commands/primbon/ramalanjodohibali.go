@@ -16,6 +16,7 @@ func init() {
 		Description: "Ramalan jodoh Bali berdasarkan nama & tanggal lahir",
 		Usage:       "ramaljodohibali <nama1> <tgl> <bln> <thn> | <nama2> <tgl> <bln> <thn>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

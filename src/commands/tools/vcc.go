@@ -16,6 +16,7 @@ func init() {
 		Description: "Generate virtual credit card",
 		Usage:       "vcc [type] [jumlah]",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

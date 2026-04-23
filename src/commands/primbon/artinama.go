@@ -15,6 +15,7 @@ func init() {
 		Description: "Arti dan karakter berdasarkan nama",
 		Usage:       "artinama <nama>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

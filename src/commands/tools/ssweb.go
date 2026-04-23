@@ -16,6 +16,7 @@ func init() {
 		Description: "Screenshot website dengan custom device dan theme",
 		Usage:       "ssweb <url> [device] [theme] [fullpage]",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ctx *core.Ptz) error {
 			ctx.React("⏳")
 			defer ctx.Unreact()

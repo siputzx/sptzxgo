@@ -15,6 +15,7 @@ func init() {
 		Description: "Chat dengan DeepSeek R1 AI",
 		Usage:       "deepseekr1 <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			prompt := ptz.RawArgs
 

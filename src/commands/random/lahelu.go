@@ -32,6 +32,7 @@ func init() {
 		Description: "Random post dari Lahelu",
 		Usage:       "lahelu",
 		Category:    "random",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("😂")
 			defer ptz.Unreact()

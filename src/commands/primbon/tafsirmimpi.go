@@ -16,6 +16,7 @@ func init() {
 		Description: "Tafsir mimpi menurut primbon",
 		Usage:       "tafsirmimpi <kata kunci>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

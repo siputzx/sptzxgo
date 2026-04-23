@@ -23,6 +23,7 @@ func init() {
 		Description: "Chat dengan GPT OSS 120B",
 		Usage:       "gptoss120b <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			prompt := ptz.RawArgs
 

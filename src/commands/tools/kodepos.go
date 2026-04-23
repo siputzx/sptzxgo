@@ -16,6 +16,7 @@ func init() {
 		Description: "Cari kode pos berdasarkan nama desa/kelurahan",
 		Usage:       "kodepos <nama desa>",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

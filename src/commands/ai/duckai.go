@@ -15,6 +15,7 @@ func init() {
 		Description: "Chat dengan DuckAI",
 		Usage:       "duckai <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			message := ptz.RawArgs
 

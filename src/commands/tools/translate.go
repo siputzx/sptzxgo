@@ -15,6 +15,7 @@ func init() {
 		Description: "Terjemahkan teks ke bahasa lain",
 		Usage:       "translate <source>:<target> <teks>\nContoh: translate en:id Hello world",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

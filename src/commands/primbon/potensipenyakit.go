@@ -14,6 +14,7 @@ func init() {
 		Description: "Potensi penyakit berdasarkan tanggal lahir",
 		Usage:       "potensipenyakit <tgl> <bln> <thn>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

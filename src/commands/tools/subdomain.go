@@ -17,6 +17,7 @@ func init() {
 		Description: "Enumerate subdomain dari sebuah domain",
 		Usage:       "subdomain <domain>",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

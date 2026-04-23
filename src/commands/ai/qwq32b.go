@@ -23,6 +23,7 @@ func init() {
 		Description: "Chat dengan QwQ 32B (Reasoning)",
 		Usage:       "qwq32b <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			prompt := ptz.RawArgs
 

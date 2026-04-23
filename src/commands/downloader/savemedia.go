@@ -12,6 +12,7 @@ func init() {
 		Description: "Simpan media dari pesan reply atau yang dikirim langsung",
 		Usage:       "savemedia (media)",
 		Category:    "downloader",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			input := serialize.GetInputMedia(ptz.Message)
 			if input == nil {

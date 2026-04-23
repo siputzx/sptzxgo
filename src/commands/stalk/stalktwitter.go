@@ -17,6 +17,7 @@ func init() {
 		Description: "Stalk profil Twitter/X",
 		Usage:       "stalktwitter <username>",
 		Category:    "stalk",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("*stalktwitter* — Stalk profil Twitter/X\n\nUsage: .stalktwitter <username>")

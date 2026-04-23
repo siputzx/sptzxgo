@@ -47,6 +47,7 @@ func init() {
 		Description: "Download audio SoundCloud",
 		Usage:       "soundcloud <url>",
 		Category:    "downloader",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("*soundcloud* — Download audio SoundCloud\n\nUsage: .soundcloud <url>")

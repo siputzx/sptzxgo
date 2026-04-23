@@ -28,6 +28,7 @@ func init() {
 			Description: fmt.Sprintf("Generate %s effect", effect.Desc),
 			Usage:       fmt.Sprintf("%s <text>", effect.Name),
 			Category:    "maker",
+			Quota:       core.PerUserQuota(1),
 			Handler: func(ptz *core.Ptz) error {
 				if len(ptz.Args) < 1 {
 					return ptz.ReplyText(fmt.Sprintf("Format: .%s <text>", effect.Name))

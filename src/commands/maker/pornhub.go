@@ -16,6 +16,7 @@ func init() {
 		Description: "Generate PornHub style logo",
 		Usage:       "pornhub <text1> | <text2>",
 		Category:    "maker",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			parts := strings.Split(ptz.RawArgs, "|")
 			if len(parts) < 2 {

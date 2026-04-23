@@ -25,6 +25,7 @@ func init() {
 		Description: "Random anime quote dari siputzx",
 		Usage:       "quotesanime",
 		Category:    "random",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("✨")
 			defer ptz.Unreact()

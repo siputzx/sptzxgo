@@ -23,6 +23,7 @@ func init() {
 		Description: "Chat dengan GLM 4.7 Flash",
 		Usage:       "glm47flash <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			prompt := ptz.RawArgs
 

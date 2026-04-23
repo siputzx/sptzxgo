@@ -19,6 +19,8 @@ func init() {
 		Description: "Chat dengan Gemini AI",
 		Usage:       "gemini <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
+		Limit:       core.PerUserLimit(8, time.Minute),
 		Handler: func(ptz *core.Ptz) error {
 			text := ptz.RawArgs
 

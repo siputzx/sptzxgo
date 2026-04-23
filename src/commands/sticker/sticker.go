@@ -12,6 +12,7 @@ func init() {
 		Description: "Buat sticker dari image atau video (reply atau kirim langsung)",
 		Usage:       "sticker (image/video)",
 		Category:    "sticker",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			input := serialize.GetInputMedia(ptz.Message, "image", "video")
 			if input == nil {

@@ -21,6 +21,7 @@ func init() {
 		Description: "Tanya GitaGPT",
 		Usage:       "gita <question>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			question := ptz.RawArgs
 

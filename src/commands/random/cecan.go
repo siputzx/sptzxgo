@@ -14,6 +14,7 @@ func init() {
 		Description: "Random cecan images",
 		Usage:       "cecan [country]",
 		Category:    "random",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			countries := []string{"indonesia", "thailand", "vietnam", "china", "japan", "korea"}
 			country := "indonesia"

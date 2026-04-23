@@ -14,6 +14,7 @@ func init() {
 		Description: "Rejeki dan hoki berdasarkan weton kelahiran",
 		Usage:       "rejekihoki <tgl> <bln> <thn>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

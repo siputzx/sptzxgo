@@ -16,6 +16,7 @@ func init() {
 		Description: "Cek energi dan keberuntungan nomor telepon",
 		Usage:       "cekhoki <nomor>",
 		Category:    "primbon",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()

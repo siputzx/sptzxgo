@@ -23,6 +23,7 @@ func init() {
 		Description: "Chat dengan Phi-2 AI",
 		Usage:       "phi2 <message>",
 		Category:    "ai",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			prompt := ptz.RawArgs
 

@@ -44,6 +44,7 @@ func init() {
 		Description: "Download media Threads",
 		Usage:       "threads <url>",
 		Category:    "downloader",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("*threads* — Download media Threads\n\nUsage: .threads <url>")

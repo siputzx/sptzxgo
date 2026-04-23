@@ -15,6 +15,7 @@ func init() {
 		Description: "Generate Blackpink style logo",
 		Usage:       "blackpink <text>",
 		Category:    "maker",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) < 1 {
 				return ptz.ReplyText("Format: .blackpink <text>")

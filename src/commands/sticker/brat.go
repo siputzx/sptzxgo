@@ -22,6 +22,7 @@ func init() {
 		Description: "Buat sticker brat dari teks",
 		Usage:       "brat <teks>  |  brat a <teks> (animated)",
 		Category:    "sticker",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("Masukkan teks.\nContoh: .brat halo\nAnimated: .brat a halo dunia")

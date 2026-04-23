@@ -34,6 +34,7 @@ func init() {
 		Description: "Download video Douyin",
 		Usage:       "douyin <url>",
 		Category:    "downloader",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			if len(ptz.Args) == 0 {
 				return ptz.ReplyText("*douyin* — Download video Douyin\n\nUsage: .douyin <url>")

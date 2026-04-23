@@ -30,6 +30,10 @@ func init() {
 				return ptz.ReplyText("❌ URL TikTok tidak valid.")
 			}
 
+			if err := core.EnsureQuotaAvailable(ptz, 1); err != nil {
+				return err
+			}
+
 			ptz.React("⏳")
 			defer ptz.Unreact()
 
@@ -89,7 +93,16 @@ func init() {
 				return ptz.ReplyText("❌ Gagal mendownload video.")
 			}
 
-			return ptz.ReplyVideo(vData, "video/mp4", caption)
+			if err := ptz.ReplyVideo(vData, "video/mp4", caption); err != nil {
+				return err
+			}
+
+			if err := core.ConsumeQuota(ptz, 1); err != nil {
+				ptz.Bot.Log.Errorf("tiktok success quota consume error: %v", err)
+				return err
+			}
+
+			return nil
 		},
 	})
 }

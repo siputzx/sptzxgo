@@ -17,6 +17,7 @@ func init() {
 		Description: "Info lengkap tentang sebuah negara",
 		Usage:       "countryinfo <nama negara>",
 		Category:    "tools",
+		Quota:       core.PerUserQuota(1),
 		Handler: func(ptz *core.Ptz) error {
 			ptz.React("⏳")
 			defer ptz.Unreact()
